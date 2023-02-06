@@ -51,33 +51,39 @@ resource "aws_instance" "web_instances" {
   }
 }
 
-module "web_elb_http" {
-  source  = "terraform-aws-modules/elb/aws"
-  version = "~> 2.0"
+module "web_alb" {
+  source  = "terraform-aws-modules/alb/aws"
+  version = "~> 8.0"
 
-  name            = "web-elb-http"
+  name = "web-alb"
+
+  load_balancer_type = "application"
+
+  vpc_id          = module.default_vpc.vpc_id
   subnets         = module.default_vpc.public_subnets
   security_groups = [module.default_vpc.default_security_group_id]
-  internal        = false
 
-  listener = [
+  target_groups = [
     {
-      instance_port     = 80
-      instance_protocol = "HTTP"
-      lb_port           = 80
-      lb_protocol       = "HTTP"
+      name_prefix      = "pref-"
+      backend_protocol = "HTTP"
+      backend_port     = 80
+      target_type      = "instance"
+      targets = {
+        my_target = {
+          target_id = "i-0123456789abcdefg"
+          port      = 80
+        }
+      }
     }
   ]
 
-  health_check = {
-    target              = "HTTP:80/"
-    interval            = 30
-    healthy_threshold   = 2
-    unhealthy_threshold = 2
-    timeout             = 5
-  }
-
-  number_of_instances = 2
-  instances           = aws_instance.web_instances[*].id
+  http_tcp_listeners = [
+    {
+      port               = 80
+      protocol           = "HTTP"
+      target_group_index = 0
+    }
+  ]
 
 }
