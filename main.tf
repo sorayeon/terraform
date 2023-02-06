@@ -77,10 +77,6 @@ module "web_elb_http" {
     timeout             = 5
   }
 
-  access_logs = {
-    bucket = "mydata-s3"
-  }
-
   number_of_instances = 2
   instances           = aws_instance.web_instances[*].id
 
