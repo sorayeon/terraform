@@ -65,16 +65,9 @@ module "web_alb" {
 
   target_groups = [
     {
-      name_prefix      = "pref-"
       backend_protocol = "HTTP"
       backend_port     = 80
       target_type      = "instance"
-      targets = {
-        my_target = {
-          target_id = "i-0123456789abcdefg"
-          port      = 80
-        }
-      }
     }
   ]
 
